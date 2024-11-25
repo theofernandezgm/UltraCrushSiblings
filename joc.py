@@ -32,6 +32,18 @@ bullet_speed = 10
 
 platforms = [(100, GROUND_HEIGHT - PLATFORM_HEIGHT), (500, GROUND_HEIGHT - PLATFORM_HEIGHT)]
 
+def check_platform_collision(player_rect, platforms):
+    global velocity_y, on_ground, player_y
+    for platform in platforms:
+        platform_rect = pygame.Rect(platform[0], platform[1], PLATFORM_WIDTH, 20)
+        if player_rect.colliderect(platform_rect) and velocity_y >= 0:
+            on_ground = True
+            velocity_y = 0
+            player_y = platform_rect.top - player_height
+            break
+    else:
+        on_ground = False
+
 running = True
 while running:
     screen.fill(WHITE)
@@ -42,7 +54,7 @@ while running:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 bullets.append([player_x + player_width // 2 - 5, player_y])
-
+    
     keys = pygame.key.get_pressed()
 
     if keys[pygame.K_LEFT]:
@@ -54,8 +66,12 @@ while running:
         velocity_y = jump_power
         on_ground = False
 
+    player_rect = pygame.Rect(player_x, player_y, player_width, player_height)
+
     velocity_y += gravity
     player_y += velocity_y
+
+    check_platform_collision(player_rect, platforms)
 
     if player_y >= GROUND_HEIGHT - player_height:
         player_y = GROUND_HEIGHT - player_height
@@ -72,7 +88,7 @@ while running:
         if bullet[1] < 0:
             bullets.remove(bullet)
 
-    pygame.draw.rect(screen, BLUE, (player_x, player_y, player_width, player_height))
+    pygame.draw.rect(screen, BLUE, player_rect)
 
     for platform in platforms:
         pygame.draw.rect(screen, (0, 255, 0), (platform[0], platform[1], PLATFORM_WIDTH, 20))
