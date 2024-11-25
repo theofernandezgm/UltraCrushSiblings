@@ -1,5 +1,6 @@
 import pygame
 import sys
+import math
 
 pygame.init()
 
@@ -31,6 +32,11 @@ bullets = []
 bullet_speed = 10
 
 platforms = [(100, GROUND_HEIGHT - PLATFORM_HEIGHT), (500, GROUND_HEIGHT - PLATFORM_HEIGHT)]
+player_angle = 0
+
+# Load the background image from the local directory
+background = pygame.image.load('background_image.jpg')  # Replace with your image filename
+background = pygame.transform.scale(background, (SCREEN_WIDTH, SCREEN_HEIGHT))  # Scale to fit the screen
 
 def check_platform_collision(player_rect, platforms):
     global velocity_y, on_ground, player_y
@@ -44,23 +50,40 @@ def check_platform_collision(player_rect, platforms):
     else:
         on_ground = False
 
+def shoot_bullet():
+    angle_rad = math.radians(player_angle)
+    dx = bullet_speed * math.cos(angle_rad)
+    dy = bullet_speed * math.sin(angle_rad)
+    bullets.append([player_x + player_width // 2, player_y + player_height // 2, dx, dy])
+
 running = True
 while running:
     screen.fill(WHITE)
+    
+    # Draw the background image
+    screen.blit(background, (0, 0))  # Blit the background image at (0, 0)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
-                bullets.append([player_x + player_width // 2 - 5, player_y])
+                shoot_bullet()
     
     keys = pygame.key.get_pressed()
 
     if keys[pygame.K_LEFT]:
         player_x -= player_speed
+        player_angle = 180
     if keys[pygame.K_RIGHT]:
         player_x += player_speed
+        player_angle = 0
+    if keys[pygame.K_UP]:
+        player_y -= player_speed
+        player_angle = 270
+    if keys[pygame.K_DOWN]:
+        player_y += player_speed
+        player_angle = 90
 
     if keys[pygame.K_UP] and on_ground:
         velocity_y = jump_power
@@ -84,8 +107,9 @@ while running:
         player_x = SCREEN_WIDTH - player_width
 
     for bullet in bullets[:]:
-        bullet[1] -= bullet_speed
-        if bullet[1] < 0:
+        bullet[0] += bullet[2]
+        bullet[1] += bullet[3]
+        if bullet[0] < 0 or bullet[0] > SCREEN_WIDTH or bullet[1] < 0 or bullet[1] > SCREEN_HEIGHT:
             bullets.remove(bullet)
 
     pygame.draw.rect(screen, BLUE, player_rect)
