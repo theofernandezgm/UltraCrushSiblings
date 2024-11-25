@@ -13,7 +13,7 @@ PLATFORM_HEIGHT = 100
 PLATFORM_WIDTH = 200
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Barebones Shooter")
+pygame.display.set_caption("Ultra Crush Siblings (intento)")
 
 clock = pygame.time.Clock()
 
