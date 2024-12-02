@@ -1,6 +1,7 @@
 import pygame
 import sys
 import math
+import os
 
 pygame.init()
 
@@ -19,13 +20,24 @@ clock = pygame.time.Clock()
 
 player_x = SCREEN_WIDTH // 2
 player_y = GROUND_HEIGHT - 50
-player_width = 40
-player_height = 40
+player_width = 70
+player_height = 70
 player_speed = 7
 velocity_y = 0
 gravity = 1
-jump_power = -15
+jump_power = -20
 on_ground = False
+frame_index = 0
+player_frames = []
+
+try:
+    for i in range(1, 11):
+        frame_path = os.path.join(os.path.dirname(__file__), f"frame{i}.png")
+        frame = pygame.image.load(frame_path)
+        frame = pygame.transform.scale(frame, (player_width, player_height))
+        player_frames.append(frame)
+except pygame.error as e:
+    print(f"Error: no s'ha pogut carregar el personatge {e}")
 
 bullet_list = []
 bullet_speed = 15
@@ -33,16 +45,17 @@ bullet_size = (50, 100)
 try:
     bullet_image = pygame.image.load('bullets_image.png')
     bullet_image = pygame.transform.scale(bullet_image, bullet_size)
-except:
+except pygame.error as e:
+    print(f"Error: no s'ha pogut carregar la imatge de la bala {e}")
     bullet_image = None
 
 platforms = [(150, GROUND_HEIGHT - PLATFORM_HEIGHT), (500, GROUND_HEIGHT - PLATFORM_HEIGHT)]
-player_angle = 0
 
 try:
-    background = pygame.image.load('background_image.jpg') 
+    background = pygame.image.load('background_image.jpg')
     background = pygame.transform.scale(background, (SCREEN_WIDTH, SCREEN_HEIGHT))
-except:
+except pygame.error as e:
+    print(f"Error: no s'ha pogut carregar la imatge de fons {e}")
     background = None
 
 def check_platform_collision(player_rect, platforms):
@@ -72,7 +85,7 @@ while running:
     screen.fill(WHITE)
 
     if background:
-        screen.blit(background, (0, 0))  
+        screen.blit(background, (0, 0))
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -81,23 +94,23 @@ while running:
             if event.key == pygame.K_z and not shooting:
                 shoot_bullet()
                 shooting = True
-            if event.key == pygame.K_UP:
-                player_angle = 270
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_z:
                 shooting = False
-    
+
     keys = pygame.key.get_pressed()
 
     if keys[pygame.K_LEFT]:
         player_x -= player_speed
-        player_angle = 180
-    if keys[pygame.K_RIGHT]:
+        direction = 'left'
+    elif keys[pygame.K_RIGHT]:
         player_x += player_speed
-        player_angle = 0
+        direction = 'right'
+    else:
+        direction = 'right'
+
     if keys[pygame.K_DOWN]:
         player_y += player_speed
-        player_angle = 90
 
     if keys[pygame.K_x] and on_ground:
         velocity_y = jump_power
@@ -120,24 +133,32 @@ while running:
     if player_x + player_width > SCREEN_WIDTH:
         player_x = SCREEN_WIDTH - player_width
 
+    if player_frames:
+        if direction == 'left':
+            frame = pygame.transform.flip(player_frames[frame_index % len(player_frames)], True, False)
+        else:
+            frame = player_frames[frame_index % len(player_frames)]
+        screen.blit(frame, (player_x, player_y))
+
+    for platform in platforms:
+        pygame.draw.rect(screen, (0, 255, 0), (platform[0], platform[1], PLATFORM_WIDTH, 20))
+
     for bullet in bullet_list[:]:
         bullet[0] += bullet[2]
         bullet[1] += bullet[3]
         if bullet[0] < 0 or bullet[0] > SCREEN_WIDTH or bullet[1] < 0 or bullet[1] > SCREEN_HEIGHT:
             bullet_list.remove(bullet)
 
-    pygame.draw.rect(screen, BLUE, player_rect)
-
-    for platform in platforms:
-        pygame.draw.rect(screen, (0, 255, 0), (platform[0], platform[1], PLATFORM_WIDTH, 20))
-
-    for bullet in bullet_list:
         if bullet_image:
             rotated_bullet = pygame.transform.rotate(bullet_image, -bullet[4])
             bullet_rect = rotated_bullet.get_rect(center=(bullet[0], bullet[1]))
             screen.blit(rotated_bullet, bullet_rect.topleft)
         else:
             pygame.draw.rect(screen, RED, (bullet[0], bullet[1], bullet_size[0], bullet_size[1]))
+
+    frame_index += 1
+    if frame_index >= len(player_frames):
+        frame_index = 0
 
     pygame.display.flip()
     clock.tick(60)
