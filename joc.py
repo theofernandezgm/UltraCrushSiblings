@@ -12,6 +12,7 @@ BLUE = (0, 0, 255)
 GROUND_HEIGHT = SCREEN_HEIGHT - 100
 PLATFORM_HEIGHT = 150
 PLATFORM_WIDTH = 200
+RED = (255, 0, 0)
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Ultra Crush Siblings (intento)")
@@ -20,12 +21,12 @@ clock = pygame.time.Clock()
 
 player_x = SCREEN_WIDTH // 2
 player_y = GROUND_HEIGHT - 50
-player_width = 70
-player_height = 70
+player_width = 100
+player_height = 100
 player_speed = 7
 velocity_y = 0
 gravity = 1
-jump_power = -20
+jump_power = -15
 on_ground = False
 frame_index = 0
 player_frames = []
@@ -75,11 +76,16 @@ def shoot_bullet():
     dx = bullet_speed * math.cos(angle_rad)
     dy = bullet_speed * math.sin(angle_rad)
     bullet_x = player_x + player_width // 2
-    bullet_y = player_y
+    bullet_y = player_y + player_height // 2
     bullet_list.append([bullet_x, bullet_y, dx, dy, player_angle])
 
 running = True
 shooting = False
+direction = 'right'
+player_angle = 0 
+frame_delay = 10
+frame_counter = 0
+moving = False
 
 while running:
     screen.fill(WHITE)
@@ -101,15 +107,25 @@ while running:
     keys = pygame.key.get_pressed()
 
     if keys[pygame.K_LEFT]:
+        player_angle = 180
         player_x -= player_speed
-        direction = 'left'
+        moving = True
+        if direction != 'left':
+            direction = 'left'
     elif keys[pygame.K_RIGHT]:
+        player_angle = 0 
         player_x += player_speed
-        direction = 'right'
+        moving = True
+        if direction != 'right':
+            direction = 'right'
     else:
-        direction = 'right'
+        moving = False
+    
+    if keys[pygame.K_UP]:
+        player_angle = 270
 
     if keys[pygame.K_DOWN]:
+        player_angle = 90
         player_y += player_speed
 
     if keys[pygame.K_x] and on_ground:
@@ -134,10 +150,19 @@ while running:
         player_x = SCREEN_WIDTH - player_width
 
     if player_frames:
-        if direction == 'left':
-            frame = pygame.transform.flip(player_frames[frame_index % len(player_frames)], True, False)
+        if moving:
+            if frame_counter >= frame_delay:
+                frame_index = (frame_index + 1) % len(player_frames)
+                frame_counter = 0
+            frame_counter += 1
         else:
-            frame = player_frames[frame_index % len(player_frames)]
+            frame_index = 0
+
+        if direction == 'left':
+            frame = pygame.transform.flip(player_frames[frame_index], True, False)
+        else:
+            frame = player_frames[frame_index]
+        
         screen.blit(frame, (player_x, player_y))
 
     for platform in platforms:
@@ -155,10 +180,6 @@ while running:
             screen.blit(rotated_bullet, bullet_rect.topleft)
         else:
             pygame.draw.rect(screen, RED, (bullet[0], bullet[1], bullet_size[0], bullet_size[1]))
-
-    frame_index += 1
-    if frame_index >= len(player_frames):
-        frame_index = 0
 
     pygame.display.flip()
     clock.tick(60)
