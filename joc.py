@@ -9,8 +9,8 @@ SCREEN_HEIGHT = 600
 WHITE = (255, 255, 255)
 BLUE = (0, 0, 255)
 RED = (255, 0, 0)
-GROUND_HEIGHT = SCREEN_HEIGHT - 50
-PLATFORM_HEIGHT = 100
+GROUND_HEIGHT = SCREEN_HEIGHT - 100
+PLATFORM_HEIGHT = 150
 PLATFORM_WIDTH = 200
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -20,23 +20,23 @@ clock = pygame.time.Clock()
 
 player_x = SCREEN_WIDTH // 2
 player_y = GROUND_HEIGHT - 50
-player_width = 50
-player_height = 50
-player_speed = 5
+player_width = 40
+player_height = 40
+player_speed = 7
 velocity_y = 0
 gravity = 1
 jump_power = -15
 on_ground = False
 
 bullets = []
-bullet_speed = 10
+bullet_speed = 15
+bullets = pygame.image.load('bullets_image.png')
 
-platforms = [(100, GROUND_HEIGHT - PLATFORM_HEIGHT), (500, GROUND_HEIGHT - PLATFORM_HEIGHT)]
+platforms = [(150, GROUND_HEIGHT - PLATFORM_HEIGHT), (500, GROUND_HEIGHT - PLATFORM_HEIGHT)]
 player_angle = 0
 
-# Load the background image from the local directory
-background = pygame.image.load('background_image.jpg')  # Replace with your image filename
-background = pygame.transform.scale(background, (SCREEN_WIDTH, SCREEN_HEIGHT))  # Scale to fit the screen
+background = pygame.image.load('background_image.jpg') 
+background = pygame.transform.scale(background, (SCREEN_WIDTH, SCREEN_HEIGHT))  
 
 def check_platform_collision(player_rect, platforms):
     global velocity_y, on_ground, player_y
@@ -60,8 +60,8 @@ running = True
 while running:
     screen.fill(WHITE)
     
-    # Draw the background image
-    screen.blit(background, (0, 0))  # Blit the background image at (0, 0)
+   
+    screen.blit(background, (0, 0))  
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
