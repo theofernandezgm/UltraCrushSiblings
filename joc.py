@@ -10,8 +10,8 @@ SCREEN_HEIGHT = 600
 WHITE = (255, 255, 255)
 BLUE = (0, 0, 255)
 GROUND_HEIGHT = SCREEN_HEIGHT - 100
-PLATFORM_HEIGHT = 150
-PLATFORM_WIDTH = 200
+PLATFORM_HEIGHT = 100
+PLATFORM_WIDTH = 100
 RED = (255, 0, 0)
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -23,10 +23,12 @@ player_x = SCREEN_WIDTH // 2
 player_y = GROUND_HEIGHT - 50
 player_width = 100
 player_height = 100
+collision_width = 50
+collision_height = 20
 player_speed = 7
 velocity_y = 0
 gravity = 1
-jump_power = -15
+jump_power = -17
 on_ground = False
 frame_index = 0
 player_frames = []
@@ -132,7 +134,9 @@ while running:
         velocity_y = jump_power
         on_ground = False
 
-    player_rect = pygame.Rect(player_x, player_y, player_width, player_height)
+    player_rect = pygame.Rect(player_x + (player_width - collision_width) // 2, 
+                              player_y + (player_height - collision_height), 
+                              collision_width, collision_height)
 
     velocity_y += gravity
     player_y += velocity_y
