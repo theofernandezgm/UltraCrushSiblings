@@ -61,6 +61,8 @@ except pygame.error as e:
     print(f"Error: no s'ha pogut carregar la imatge de fons {e}")
     background = None
 
+BLAST_ZONE_DISTANCE = 500
+
 def check_platform_collision(player_rect, platforms):
     global velocity_y, on_ground, player_y
     for platform in platforms:
@@ -81,10 +83,25 @@ def shoot_bullet():
     bullet_y = player_y + player_height // 2
     bullet_list.append([bullet_x, bullet_y, dx, dy, player_angle])
 
+def check_out_of_bounds():
+    global player_x, player_y, velocity_y
+    blast_left = -BLAST_ZONE_DISTANCE
+    blast_right = SCREEN_WIDTH + BLAST_ZONE_DISTANCE
+    blast_top = -BLAST_ZONE_DISTANCE
+    blast_bottom = SCREEN_HEIGHT + BLAST_ZONE_DISTANCE
+
+    if (player_x < blast_left or 
+        player_x > blast_right or 
+        player_y < blast_top or 
+        player_y > blast_bottom):
+        player_x = SCREEN_WIDTH // 2
+        player_y = GROUND_HEIGHT - player_height
+        velocity_y = 0
+
 running = True
 shooting = False
 direction = 'right'
-player_angle = 0 
+player_angle = 0
 frame_delay = 10
 frame_counter = 0
 moving = False
@@ -115,14 +132,14 @@ while running:
         if direction != 'left':
             direction = 'left'
     elif keys[pygame.K_RIGHT]:
-        player_angle = 0 
+        player_angle = 0
         player_x += player_speed
         moving = True
         if direction != 'right':
             direction = 'right'
     else:
         moving = False
-    
+
     if keys[pygame.K_UP]:
         player_angle = 270
 
@@ -134,13 +151,12 @@ while running:
         velocity_y = jump_power
         on_ground = False
 
-    player_rect = pygame.Rect(player_x + (player_width - collision_width) // 2, 
-                              player_y + (player_height - collision_height), 
-                              collision_width, collision_height)
-
     velocity_y += gravity
     player_y += velocity_y
 
+    player_rect = pygame.Rect(player_x + (player_width - collision_width) // 2, 
+                              player_y + (player_height - collision_height), 
+                              collision_width, collision_height)
     check_platform_collision(player_rect, platforms)
 
     if player_y >= GROUND_HEIGHT - player_height:
@@ -148,10 +164,7 @@ while running:
         on_ground = True
         velocity_y = 0
 
-    if player_x < 0:
-        player_x = 0
-    if player_x + player_width > SCREEN_WIDTH:
-        player_x = SCREEN_WIDTH - player_width
+    check_out_of_bounds()
 
     if player_frames:
         if moving:
@@ -166,7 +179,7 @@ while running:
             frame = pygame.transform.flip(player_frames[frame_index], True, False)
         else:
             frame = player_frames[frame_index]
-        
+
         screen.blit(frame, (player_x, player_y))
 
     for platform in platforms:
@@ -175,7 +188,8 @@ while running:
     for bullet in bullet_list[:]:
         bullet[0] += bullet[2]
         bullet[1] += bullet[3]
-        if bullet[0] < 0 or bullet[0] > SCREEN_WIDTH or bullet[1] < 0 or bullet[1] > SCREEN_HEIGHT:
+        if bullet[0] < -BLAST_ZONE_DISTANCE or bullet[0] > SCREEN_WIDTH + BLAST_ZONE_DISTANCE or \
+           bullet[1] < -BLAST_ZONE_DISTANCE or bullet[1] > SCREEN_HEIGHT + BLAST_ZONE_DISTANCE:
             bullet_list.remove(bullet)
 
         if bullet_image:
