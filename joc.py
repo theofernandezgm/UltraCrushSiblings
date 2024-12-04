@@ -33,9 +33,15 @@ on_ground = False
 frame_index = 0
 player_frames = []
 
+ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
+ANIMATIONS_DIR = os.path.join(ASSETS_DIR, "animations", "walk-animation")
+SPRITES_DIR = os.path.join(ASSETS_DIR, "sprites")
+BACKGROUND_DIR = os.path.join(SPRITES_DIR, "background")
+BULLET_DIR = os.path.join(SPRITES_DIR, "bullet-sprite")
+
 try:
     for i in range(1, 11):
-        frame_path = os.path.join(os.path.dirname(__file__), f"frame{i}.png")
+        frame_path = os.path.join(ANIMATIONS_DIR, f"frame{i}.png")
         frame = pygame.image.load(frame_path)
         frame = pygame.transform.scale(frame, (player_width, player_height))
         player_frames.append(frame)
@@ -46,7 +52,7 @@ bullet_list = []
 bullet_speed = 15
 bullet_size = (50, 100)
 try:
-    bullet_image = pygame.image.load('bullets_image.png')
+    bullet_image = pygame.image.load(os.path.join(BULLET_DIR, "bullets_image.png"))
     bullet_image = pygame.transform.scale(bullet_image, bullet_size)
 except pygame.error as e:
     print(f"Error: no s'ha pogut carregar la imatge de la bala {e}")
@@ -55,7 +61,7 @@ except pygame.error as e:
 platforms = [(150, GROUND_HEIGHT - PLATFORM_HEIGHT), (500, GROUND_HEIGHT - PLATFORM_HEIGHT)]
 
 try:
-    background = pygame.image.load('background_image.jpg')
+    background = pygame.image.load(os.path.join(BACKGROUND_DIR, "background_image.jpg"))
     background = pygame.transform.scale(background, (SCREEN_WIDTH, SCREEN_HEIGHT))
 except pygame.error as e:
     print(f"Error: no s'ha pogut carregar la imatge de fons {e}")
