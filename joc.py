@@ -40,7 +40,7 @@ BACKGROUND_DIR = os.path.join(SPRITES_DIR, "background")
 BULLET_DIR = os.path.join(SPRITES_DIR, "bullet-sprite")
 
 try:
-    for i in range(1, 11):
+    for i in range(1, 12):
         frame_path = os.path.join(ANIMATIONS_DIR, f"frame{i}.png")
         frame = pygame.image.load(frame_path)
         frame = pygame.transform.scale(frame, (player_width, player_height))
@@ -108,7 +108,7 @@ running = True
 shooting = False
 direction = 'right'
 player_angle = 0
-frame_delay = 10
+frame_delay = 5
 frame_counter = 0
 moving = False
 
